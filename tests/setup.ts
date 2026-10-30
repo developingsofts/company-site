@@ -41,6 +41,15 @@ beforeAll(() => {
       return [];
     }
   } as unknown as typeof IntersectionObserver;
+
+  if (!document.fonts) {
+    Object.defineProperty(document, "fonts", { value: { ready: Promise.resolve() } });
+  }
+
+  // happy-dom ships a partial Web Animations API whose cancel() rejects the
+  // `finished` promise Motion never awaits, so every interrupted exit throws
+  // an unhandled rejection. Without it Motion animates on its own timer.
+  delete (Element.prototype as Partial<Element>).animate;
 });
 
 afterEach(() => {

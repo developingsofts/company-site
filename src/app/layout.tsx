@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Geist_Pixel } from "next/font/google";
 import { site } from "@/content/site";
 import { Providers } from "./providers";
 import "./globals.css";
 
-// The opsz axis lets fontWeights pair heavier weights with a tighter optical
-// size, so labels that change weight keep their width.
-const inter = Inter({
+const geist = Geist({
   variable: "--font-sans",
   subsets: ["latin"],
-  axes: ["opsz"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const geistPixel = Geist_Pixel({
+  variable: "--font-geist-pixel",
   subsets: ["latin"],
 });
 
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${geistPixel.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
       </body>

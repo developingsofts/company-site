@@ -17,16 +17,16 @@ script runner.
 
 ## Commands
 
-| Command | Does |
-| --- | --- |
-| `bun install` | install dependencies (never npm, pnpm or yarn) |
-| `bun dev` | dev server on :3000 |
-| `bun run build` | production build; fails on prerender errors |
-| `bun run typecheck` | `tsc --noEmit` |
-| `bun run lint` | ESLint (next core-web-vitals + typescript) |
-| `bun run test` | Vitest unit and component tests (happy-dom) |
-| `bun run test:e2e` | Playwright against a production build on :3100 |
-| `bun run check` | typecheck, lint and unit tests; run before every commit |
+| Command             | Does                                                    |
+| ------------------- | ------------------------------------------------------- |
+| `bun install`       | install dependencies (never npm, pnpm or yarn)          |
+| `bun dev`           | dev server on :3000                                     |
+| `bun run build`     | production build; fails on prerender errors             |
+| `bun run typecheck` | `tsc --noEmit`                                          |
+| `bun run lint`      | ESLint (next core-web-vitals + typescript)              |
+| `bun run test`      | Vitest unit and component tests (happy-dom)             |
+| `bun run test:e2e`  | Playwright against a production build on :3100          |
+| `bun run check`     | typecheck, lint and unit tests; run before every commit |
 
 Add packages with `bun add` / `bun add -d`. Add shadcn or Fluid Functionalism
 items with `bunx --bun shadcn@latest add …`.
@@ -47,9 +47,13 @@ items with `bunx --bun shadcn@latest add …`.
   that needs a hook or an event handler, as low in the tree as possible.
 - **Installed design-system files are vendored.** Don't edit
   `src/components/ui/*`, `src/components/fluid-hover-highlight.tsx`,
-  `src/hooks/*` or the Fluid Functionalism files in `src/lib/` (everything
-  there except `utils.ts`). Wrap or compose them; edits are lost on the
-  next `--overwrite` update.
+  `src/hooks/*`, the Fluid Functionalism files in `src/lib/` (everything
+  there except `utils.ts`) or the React Bits components
+  (`src/components/{SwarmCursor,Noise,MagicBento}.tsx`, installed from
+  `https://reactbits.dev/r/<Name>-TS-TW.json`). Wrap or compose them; edits
+  are lost on the next `--overwrite` update. One local patch to re-apply
+  after updating a React Bits WebGL component: its effect cleanup must not
+  call `loseContext()`, or the canvas renders blank under StrictMode.
 - **Every change ships with tests.** See Testing.
 
 ## Comments
@@ -65,20 +69,21 @@ library's rationale and are replaced on update.
 
 ## Architecture
 
-| Path | Owns |
-| --- | --- |
-| `src/app/` | routes, `layout.tsx` (fonts, `<Providers>`), `providers.tsx` (client root: `FluidProvider`), `globals.css` (theme tokens, Fluid Functionalism CSS) |
-| `src/features/<feature>/` | one feature's components, one per file, plus `index.ts` |
-| `src/features/site/` | site chrome: header, footer |
-| `src/features/home/` | home page sections |
-| `src/content/` | every word the site shows |
-| `src/components/ui/` | shadcn and Fluid Functionalism components (vendored) |
-| `src/components/` | Fluid Functionalism shared components (vendored) |
-| `src/hooks/` | Fluid Functionalism hooks (vendored) |
-| `src/lib/` | `utils.ts` (`cn`) and the vendored system libs: `springs`, `size-context`, `type-scale`, `font-weight`, `elevated`, `surface-*`, `shape-context`, `icon-context`, `fluid-provider` |
-| `tests/setup.ts` | jest-dom matchers, `matchMedia` / `ResizeObserver` / `IntersectionObserver` stand-ins for happy-dom |
-| `tests/unit/` | Vitest tests, mirroring `src/` (`tests/unit/features/…`) |
-| `tests/e2e/` | Playwright specs |
+| Path                      | Owns                                                                                                                                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/app/`                | routes, `layout.tsx` (fonts, `<Providers>`), `providers.tsx` (client root: `FluidProvider`), `globals.css` (theme tokens, Fluid Functionalism CSS)                                 |
+| `src/features/<feature>/` | one feature's components, one per file, plus `index.ts`                                                                                                                            |
+| `src/features/site/`      | site chrome: menu toggle and header, section nav (scroll spy), hover text roll, elastic line                                                                                       |
+| `src/features/home/`      | home page: a pinned sideways chapter (hero, approach) that the vertical scroll drives, then sections that scroll down (contact)                                                    |
+| `src/features/tetris/`    | the self-playing Tetris under the hero headline: rules, autoplayer, board                                                                                                          |
+| `src/content/`            | every word the site shows                                                                                                                                                          |
+| `src/components/ui/`      | shadcn and Fluid Functionalism components (vendored)                                                                                                                               |
+| `src/components/`         | Fluid Functionalism shared components (vendored)                                                                                                                                   |
+| `src/hooks/`              | Fluid Functionalism hooks (vendored)                                                                                                                                               |
+| `src/lib/`                | `utils.ts` (`cn`) and the vendored system libs: `springs`, `size-context`, `type-scale`, `font-weight`, `elevated`, `surface-*`, `shape-context`, `icon-context`, `fluid-provider` |
+| `tests/setup.ts`          | jest-dom matchers, `matchMedia` / `ResizeObserver` / `IntersectionObserver` stand-ins for happy-dom                                                                                |
+| `tests/unit/`             | Vitest tests, mirroring `src/` (`tests/unit/features/…`)                                                                                                                           |
+| `tests/e2e/`              | Playwright specs                                                                                                                                                                   |
 
 ## Design system (Fluid Functionalism)
 
@@ -90,7 +95,10 @@ The rules that matter most:
 
 - **Motion uses spring tokens.** `spring.fast` / `.moderate` / `.slow` from
   `@/lib/springs`, with `spring.<tier>.exit` for dismissals. Never hand-write
-  a duration or easing. Animate `transform` and `opacity` only.
+  a duration or easing. Animate `transform` and `opacity` only. `useSpring`
+  reads `duration` in milliseconds where the tiers give seconds, so a tier
+  passed to it as is jumps; convert it with `followSpring(tier)`
+  (`src/features/home/follow-spring.ts`).
 - **One hover highlight per list.** Lists, menus and strips with hover use
   `useFluidHover` + `<FluidHoverHighlight />`, never a per-row `:hover`
   background. Rows touch (no `gap`); only click targets register.
@@ -104,20 +112,29 @@ The rules that matter most:
   in server components, `useSize().type.<role>` in client ones. Never a raw
   `text-[13px]`, never a bare `text-caption` inside `cn()`.
 - **Weight comes from `fontWeights`.** `style={{ fontVariationSettings:
-  fontWeights.semibold }}`, never Tailwind `font-*`. `normal` for text,
-  `semibold` for headings and selected items, `bold` only for display. Text
-  that changes weight on state uses the ghost-span pattern.
+fontWeights.semibold }}`, never a Tailwind weight class (`font-semibold`).
+  `normal` for text, `semibold` for headings and selected items, `bold`
+  only for display. Text that changes weight on state uses the ghost-span
+  pattern.
+- **Three Geist families.** Geist Sans (`font-sans`, the default) for
+  headings and reading text; Geist Mono (`font-mono`) for labels, nav,
+  buttons and addresses; Geist Pixel (`font-pixel`) for the hero tagline
+  only. Geist Pixel has one weight, so it takes no `fontWeights`.
 - **Two text colors.** `text-foreground` and `text-muted-foreground`, no
-  opacity steps. No uppercase, no letter-spacing, no eyebrows.
+  opacity steps. No letter-spacing, no eyebrows, and no uppercase except
+  the approach panel's poster headline, set from mixed-case copy.
 - **Elevation from the surface ladder.** `<Elevated offset={…}>` or
   `surfaceClasses(level)`; nested corners via `nestedRadius()`.
 - **Sizes from the ladder.** `SizeProvider` / `size` prop, default (36px)
   or compact (28px); controls read `useSize()`.
 - **Theme is stock shadcn.** Use the tokens in `globals.css`; don't invent
-  parallel ones. Icons are Lucide.
-- **Inter loads with its `opsz` axis** (`layout.tsx`), so weight changes
-  keep their width. `FluidProvider` wraps the app in
-  `MotionConfig reducedMotion="user"`; keep it at the root.
+  parallel ones. Icons are Lucide, through `@/lib/icon-context`; the menu
+  toggle uses Phosphor (`@phosphor-icons/react`) for its upright bars.
+- **Fonts load in `layout.tsx`** through `next/font/google`. Geist has no
+  `opsz` axis, so the `opsz` half of `fontWeights` is ignored; the
+  ghost-span pattern keeps weight changes from moving neighbours.
+  `FluidProvider` wraps the app in `MotionConfig reducedMotion="user"`;
+  keep it at the root.
 
 Update the system with the skill's `upgrade.mjs`, never by re-installing
 everything with `--overwrite`.
@@ -131,7 +148,7 @@ everything with `--overwrite`.
 - **End to end (Playwright, Chromium).** Anything that needs real layout
   or the real build: fluid hover (assert on `data-fluid-hover-active`),
   scroll areas, reveals, fonts, reduced motion (`test.use({ reducedMotion:
-  "reduce" })`), phone-width overflow. Every route gets a spec that loads it
+"reduce" })`), phone-width overflow. Every route gets a spec that loads it
   with no console errors.
 - happy-dom has no layout or Web Animations API. Don't fake measurements
   in unit tests; move the check to e2e.

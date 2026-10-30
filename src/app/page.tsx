@@ -1,17 +1,26 @@
-import { Hero } from "@/features/home";
-import { SiteFooter, SiteHeader } from "@/features/site";
+import { home } from "@/content/home";
+import { ApproachPanel, ContactPanel, Hero, HorizontalChapter, ProcessPanel, ServicesPanel } from "@/features/home";
+import { SiteHeader, SiteMenu } from "@/features/site";
 
-// Chrome (header, footer) stays still outside the reveal container. Inside
-// .reveal-landing the first child is the hero and plays on load; every later
-// section rises with the scroll.
+// The page scrolls down. Its first chapter pins and reads sideways (hero,
+// approach, then services, which holds still while its blocks stack); once
+// that runs out, the page carries on downwards through process to contact.
+// No reveal-landing: the game playing out is the page's entrance.
 export default function HomePage() {
   return (
     <>
-      <SiteHeader />
-      <main className="reveal-landing mx-auto w-full max-w-5xl flex-1 px-4">
-        <Hero />
+      <SiteMenu>
+        <SiteHeader sections={home.sections} />
+      </SiteMenu>
+      <main>
+        <HorizontalChapter>
+          <Hero />
+          <ApproachPanel />
+          <ServicesPanel />
+        </HorizontalChapter>
+        <ProcessPanel />
+        <ContactPanel />
       </main>
-      <SiteFooter />
     </>
   );
 }
