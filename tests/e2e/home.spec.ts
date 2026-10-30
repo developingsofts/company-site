@@ -623,6 +623,92 @@ test.describe("process", () => {
   });
 });
 
+const bandOffsets = (page: Page) =>
+  page.locator("#technology textPath").evaluateAll((els) => els.map((el) => el.getAttribute("startOffset")));
+
+test.describe("technology", () => {
+  for (const width of [375, 1440]) {
+    test(`the bands share one canvas and both run while on screen, at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await visit(page);
+      await page.locator("#technology").scrollIntoViewIfNeeded();
+      const [web, mobile] = await page
+        .locator("#technology svg")
+        .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().toJSON() as DOMRect));
+      expect(web).toEqual(mobile);
+      const visible = (await page.locator("#technology [aria-hidden='true']").first().boundingBox())!;
+      expect(visible.height).toBeGreaterThan(width * 0.15);
+
+      const before = await bandOffsets(page);
+      await expect.poll(async () => (await bandOffsets(page)).every((offset, i) => offset !== before[i])).toBe(true);
+    });
+  }
+
+  test("comes straight after process", async ({ page }) => {
+    await visit(page);
+    const ids = await page.locator("main > section").evaluateAll((els) => els.map((el) => el.id));
+    expect(ids[ids.indexOf("process") + 1]).toBe("technology");
+  });
+});
+
+/** Waits until the carousel shows slide `n` of five alone, once the one leaving has faded out. */
+async function showsSlide(page: Page, n: number) {
+  await expect(page.getByRole("group", { name: `${n} of 5`, exact: true })).toBeVisible();
+  await expect(page.locator("#clients [aria-roledescription='testimonial']")).toHaveCount(1);
+}
+
+test.describe("testimonials", () => {
+  const carousel = (page: Page) => page.locator("#clients [aria-roledescription='carousel']");
+
+  for (const width of [390, 1440]) {
+    test(`holds its height through every slide, so contact never moves, at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await visit(page);
+      await carousel(page).scrollIntoViewIfNeeded();
+      const height = (await carousel(page).boundingBox())!.height;
+      const contactAt = await top(page, "#contact");
+      for (let i = 2; i <= 5; i++) {
+        await page.getByRole("button", { name: "Next testimonial", exact: true }).click();
+        await showsSlide(page, i);
+        expect((await carousel(page).boundingBox())!.height).toBe(height);
+        expect(await top(page, "#contact")).toBe(contactAt);
+      }
+    });
+  }
+
+  test("comes between technology and contact", async ({ page }) => {
+    await visit(page);
+    const ids = await page.locator("main > section").evaluateAll((els) => els.map((el) => el.id));
+    expect(ids.slice(ids.indexOf("technology"), ids.indexOf("contact") + 1)).toEqual(["technology", "clients", "contact"]);
+  });
+});
+
+test.describe("testimonials on a touch screen", () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+
+  test("a swipe across the quote changes the slide either way", async ({ page }) => {
+    await visit(page);
+    const quote = page.locator("#clients [aria-roledescription='testimonial']");
+    await quote.scrollIntoViewIfNeeded();
+    const client = await page.context().newCDPSession(page);
+    const swipe = async (dx: number) => {
+      const box = (await quote.boundingBox())!;
+      const y = box.y + box.height / 2;
+      const from = box.x + box.width / 2 - dx / 2;
+      await client.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: from, y }] });
+      for (let step = 1; step <= 8; step++) {
+        await client.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: from + (dx * step) / 8, y }] });
+      }
+      await client.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    };
+
+    await swipe(-160);
+    await showsSlide(page, 2);
+    await swipe(160);
+    await showsSlide(page, 1);
+  });
+});
+
 /** Pixels in `clip` with a clear red cast; the approach panel has none but the swarm. */
 async function reddish(page: Page, clip: { x: number; y: number; width: number; height: number }) {
   const png = (await page.screenshot({ clip })).toString("base64");
@@ -686,6 +772,14 @@ test.describe("reduced motion", () => {
     const first = await token.evaluate((el) => getComputedStyle(el).transform);
     await page.waitForTimeout(600);
     expect(await token.evaluate((el) => getComputedStyle(el).transform)).toBe(first);
+  });
+
+  test("the technology bands hold still", async ({ page }) => {
+    await visit(page);
+    await page.locator("#technology").scrollIntoViewIfNeeded();
+    const first = await bandOffsets(page);
+    await page.waitForTimeout(600);
+    expect(await bandOffsets(page)).toEqual(first);
   });
 
   test("the approach text is simply there, with no rise to wait for", async ({ page }) => {

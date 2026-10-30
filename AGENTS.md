@@ -49,7 +49,7 @@ items with `bunx --bun shadcn@latest add …`.
   `src/components/ui/*`, `src/components/fluid-hover-highlight.tsx`,
   `src/hooks/*`, the Fluid Functionalism files in `src/lib/` (everything
   there except `utils.ts`) or the React Bits components
-  (`src/components/{SwarmCursor,Noise,MagicBento}.tsx`, installed from
+  (`src/components/{SwarmCursor,Noise,MagicBento,TextLoop}.tsx`, installed from
   `https://reactbits.dev/r/<Name>-TS-TW.json`). Wrap or compose them; edits
   are lost on the next `--overwrite` update. One local patch to re-apply
   after updating a React Bits WebGL component: its effect cleanup must not
@@ -74,7 +74,7 @@ library's rationale and are replaced on update.
 | `src/app/`                | routes, `layout.tsx` (fonts, `<Providers>`), `providers.tsx` (client root: `FluidProvider`), `globals.css` (theme tokens, Fluid Functionalism CSS)                                 |
 | `src/features/<feature>/` | one feature's components, one per file, plus `index.ts`                                                                                                                            |
 | `src/features/site/`      | site chrome: menu toggle and header, section nav (scroll spy), hover text roll, elastic line                                                                                       |
-| `src/features/home/`      | home page: a pinned sideways chapter (hero, approach) that the vertical scroll drives, then sections that scroll down (contact)                                                    |
+| `src/features/home/`      | home page: a pinned sideways chapter (hero, approach) that the vertical scroll drives, then sections that scroll down (process, technology, testimonials carousel, contact)                                                    |
 | `src/features/tetris/`    | the self-playing Tetris under the hero headline: rules, autoplayer, board                                                                                                          |
 | `src/content/`            | every word the site shows                                                                                                                                                          |
 | `src/components/ui/`      | shadcn and Fluid Functionalism components (vendored)                                                                                                                               |

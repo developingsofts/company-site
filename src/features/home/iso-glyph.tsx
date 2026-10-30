@@ -10,19 +10,31 @@ const layers = Array.from({ length: Math.ceil(depth / layerStep) + 1 }, (_, i) =
 
 const [left] = project(0, 100);
 const [right] = project(100, 0);
-const viewBox = [left - 2, -2, right - left + 4, project(100, 100)[1] + depth + 4].join(" ");
+/** The glyph's canvas in face units: x, y, width, height. */
+export const glyphViewBox = [left - 2, -2, right - left + 4, project(100, 100)[1] + depth + 4] as const;
+const [centreX, centreY] = project(50, 50);
+/** Where the centre of the glyph's bottom face lands on that canvas. */
+export const glyphBase = [centreX, centreY + depth] as const;
+const viewBox = glyphViewBox.join(" ");
+
+interface IsoGlyphProps {
+  icon: Icon;
+  className?: string;
+  /** Drawn on a primary-coloured surface: lines in its foreground colour, walls in the primary. */
+  inverse?: boolean;
+}
 
 /**
  * A Phosphor glyph laid flat in isometric view and extruded into a slab: its
  * outline drawn on the top face and again along the bottom edge, with the
- * walls in between filled with the page colour so lines behind them hide.
+ * walls in between filled with the surface colour so lines behind them hide.
  */
-export function IsoGlyph({ icon: Glyph, className }: { icon: Icon; className?: string }) {
+export function IsoGlyph({ icon: Glyph, className, inverse = false }: IsoGlyphProps) {
   return (
     <svg
       viewBox={viewBox}
       aria-hidden
-      className={`overflow-visible text-primary [&_path]:[vector-effect:non-scaling-stroke] ${className ?? ""}`}
+      className={`overflow-visible ${inverse ? "text-primary-foreground" : "text-primary"} [&_path]:[vector-effect:non-scaling-stroke] ${className ?? ""}`}
     >
       {layers.map((offset) => {
         const edge = offset === depth || offset === 0;
@@ -33,7 +45,7 @@ export function IsoGlyph({ icon: Glyph, className }: { icon: Icon; className?: s
               y={0}
               size={100}
               weight="bold"
-              className="fill-background"
+              className={inverse ? "fill-primary" : "fill-background"}
               stroke={edge ? "currentColor" : "none"}
               strokeWidth={1}
               strokeLinejoin="round"

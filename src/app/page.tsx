@@ -1,10 +1,20 @@
 import { home } from "@/content/home";
-import { ApproachPanel, ContactPanel, Hero, HorizontalChapter, ProcessPanel, ServicesPanel } from "@/features/home";
+import {
+  ApproachPanel,
+  ContactPanel,
+  Hero,
+  HorizontalChapter,
+  ProcessPanel,
+  ServicesPanel,
+  TechnologyPanel,
+  TestimonialsPanel,
+} from "@/features/home";
 import { SiteHeader, SiteMenu } from "@/features/site";
 
 // The page scrolls down. Its first chapter pins and reads sideways (hero,
 // approach, then services, which holds still while its blocks stack); once
-// that runs out, the page carries on downwards through process to contact.
+// that runs out, the page carries on downwards through process, technology
+// and testimonials to contact.
 // No reveal-landing: the game playing out is the page's entrance.
 export default function HomePage() {
   return (
@@ -19,6 +29,8 @@ export default function HomePage() {
           <ServicesPanel />
         </HorizontalChapter>
         <ProcessPanel />
+        <TechnologyPanel />
+        <TestimonialsPanel />
         <ContactPanel />
       </main>
     </>

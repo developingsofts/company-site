@@ -11,3 +11,6 @@ export { dwellFor, flightOf, isolatedPose, landedCount, stackPose } from "./stac
 export { blockViewBox, project } from "./iso-geometry";
 export { ProcessPanel } from "./process-panel";
 export { fanCurves, fanFocus, pointOn, tokenAt, tokenDigit, tokenOpacity } from "./fan-geometry";
+export { TechnologyPanel } from "./technology-panel";
+export { waveTrack } from "./wave-track";
+export { TestimonialsPanel } from "./testimonials-panel";

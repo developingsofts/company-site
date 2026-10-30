@@ -10,8 +10,9 @@ function strings(value: unknown): string[] {
 
 describe("home content", () => {
   // Capitals are a styling choice made in one place, not baked into the copy.
+  // A lone word in capitals is an acronym (a job title like CEO), not shouting.
   it("keeps every line out of all caps", () => {
-    for (const line of strings(home)) expect(line).not.toBe(line.toUpperCase());
+    for (const line of strings(home).filter((s) => /\s/.test(s))) expect(line).not.toBe(line.toUpperCase());
   });
 
   it("gives every service a distinct id and its own words", () => {
@@ -25,6 +26,22 @@ describe("home content", () => {
     const { steps } = home.process;
     expect(new Set(steps.map((s) => s.id)).size).toBe(steps.length);
     for (const { title, body } of steps) expect(title && body).toBeTruthy();
+  });
+
+  it("names web and mobile technologies, each once", () => {
+    const { groups } = home.technology;
+    expect(groups.map((g) => g.id)).toEqual(["web", "mobile"]);
+    const items = groups.flatMap((g) => g.items);
+    expect(items.length).toBeGreaterThan(groups.length);
+    expect(new Set(items).size).toBe(items.length);
+  });
+
+  it("gives every testimonial a distinct client and a full attribution", () => {
+    const { items } = home.testimonials;
+    expect(items.length).toBeGreaterThan(1);
+    expect(new Set(items.map((t) => t.id)).size).toBe(items.length);
+    expect(new Set(items.map((t) => t.name)).size).toBe(items.length);
+    for (const { name, role, company, quote } of items) expect(name && role && company && quote).toBeTruthy();
   });
 
   it("gives every section a distinct id", () => {

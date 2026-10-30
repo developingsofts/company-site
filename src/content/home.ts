@@ -5,6 +5,8 @@ export const home = {
     { id: "approach", label: "Approach" },
     { id: "services", label: "Services" },
     { id: "process", label: "Process" },
+    { id: "technology", label: "Technology" },
+    { id: "clients", label: "Clients" },
     { id: "contact", label: "Contact" },
   ],
   hero: {
@@ -105,6 +107,89 @@ export const home = {
         id: "training",
         title: "Training",
         body: "Your team learns to run and evolve the product, with or without us.",
+      },
+    ],
+  },
+  technology: {
+    heading: "Web and mobile, end to end.",
+    intro:
+      "Proven, widely used tools your team can hire for and keep building on. One senior team covers the browser, the phone and the servers behind both.",
+    /** Each group runs along its own band; the bands weave together and travel opposite ways. */
+    groups: [
+      {
+        id: "web",
+        label: "Web",
+        items: [
+          "React",
+          "Next.js",
+          "TypeScript",
+          "Node.js",
+          "Vue",
+          "Svelte",
+          "Tailwind CSS",
+          "GraphQL",
+          "PostgreSQL",
+          "Medusa",
+        ],
+      },
+      {
+        id: "mobile",
+        label: "Mobile",
+        items: ["React Native", "Expo", "Swift", "SwiftUI", "Kotlin", "Jetpack Compose", "Flutter"],
+      },
+    ],
+  },
+  testimonials: {
+    heading: "What our clients say.",
+    intro: "Founders who trusted us with their product, and came back with the next one. They tell it best.",
+    carousel: "carousel",
+    slide: "testimonial",
+    of: "of",
+    previous: "Previous testimonial",
+    next: "Next testimonial",
+    picker: "Choose a testimonial",
+    join: "Join our clients",
+    /** `id` picks the drawing beside the quote. */
+    items: [
+      {
+        id: "arctic-shelf",
+        name: "Dawson Norrish",
+        role: "Founder",
+        company: "Arctic Shelf",
+        quote:
+          "Jatin and Ravi were great. They were always available for phone calls and were always willing to try new things. Very knowledgeable in IoT products and AWS integration. They were also always willing to try new things and deliver what we were asking for. Very happy.",
+      },
+      {
+        id: "bolotalk",
+        name: "Mohhamamd Asraf",
+        role: "Founder",
+        company: "BoloTalk",
+        quote:
+          "Rapidsofts team has done many projects for me, and they never failed to deliver a world class product on time. Select him to do your work… you will never regret it.",
+      },
+      {
+        id: "mapbuzz",
+        name: "Jay Amlesh",
+        role: "Founder",
+        company: "Mapbuzz",
+        quote:
+          "Job well done. They have delivered the product as I wished and I recommend them to other clients. Thank you guys and I look forward to doing more tasks with you.",
+      },
+      {
+        id: "sync-bus-lines",
+        name: "Sondra Conner",
+        role: "CEO",
+        company: "Sync Bus Lines",
+        quote:
+          "Rapidsofts team are by far the best team I've worked with in the past 5 years. Patient, understanding, creative and always ready to help.",
+      },
+      {
+        id: "mastbit",
+        name: "Jakub Fundowicz",
+        role: "CEO",
+        company: "MastBit",
+        quote:
+          "I have been a satisfied client of Rapidsofts. I am impressed with their quality work and responsiveness.",
       },
     ],
   },
